@@ -23,11 +23,11 @@ def get_connection():
 def get_engine():
     connection_url = URL.create(
         drivername="postgresql+psycopg",
-        username="postgres",
-        password="Deeksha@123",
-        host="localhost",
-        port=5432,
-        database="retail_db"
+        username=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        host=os.getenv("DB_HOST"),
+        port=int(os.getenv("DB_PORT")),
+        database=os.getenv("DB_NAME")
     )
 
     engine = create_engine(connection_url)
