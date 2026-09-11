@@ -1,247 +1,257 @@
 # Retail Data Engineering Project
 
-An end-to-end retail data engineering project built using Python, PostgreSQL, SQLAlchemy, Pandas, and Streamlit.
+## 📌 Project Overview
 
-The project demonstrates a complete data pipeline:
+This project is an end-to-end retail data engineering pipeline that extracts raw sales data from object storage, transforms and validates the data using Python, loads it into PostgreSQL, and provides an interactive Streamlit dashboard for business analytics.
 
-**Extract → Transform → Validate → Load → Analyze → Visualize**
+The project also uses Docker to create a reproducible environment and MinIO as an S3-compatible object storage system for raw data.
 
----
+## 🏗️ Architecture
 
-## Project Overview
+```text
+                 Raw CSV Data
+                      │
+                      ▼
+               ┌─────────────┐
+               │    MinIO    │
+               │ S3-compatible│
+               │   Storage   │
+               └──────┬──────┘
+                      │
+                      ▼
+              ┌──────────────┐
+              │ Python ETL   │
+              │              │
+              │ Extract      │
+              │ Transform    │
+              │ Validate     │
+              └──────┬───────┘
+                     │
+                     ▼
+              ┌──────────────┐
+              │  PostgreSQL  │
+              │   Database   │
+              └──────┬───────┘
+                     │
+                     ▼
+              ┌──────────────┐
+              │  Streamlit   │
+              │  Dashboard   │
+              └──────────────┘
 
-This project processes retail data containing:
+                 Docker
+        ─────────────────────
+        Provides reproducible
+        application environments
+```
 
-- Customers
-- Products
-- Sales
+## 🛠️ Technologies Used
 
-The pipeline reads raw CSV files, cleans and validates the data, loads it into PostgreSQL, performs SQL-based analytics, and displays the results through an interactive Streamlit dashboard.
+* Python
+* Pandas
+* MinIO
+* PostgreSQL
+* SQLAlchemy
+* Psycopg
+* Streamlit
+* Docker
+* Docker Compose
+* Pytest
+* Git & GitHub
 
----
+## 🔄 ETL Process
 
-## Technologies Used
+### 1. Extract
 
-- Python
-- Pandas
-- PostgreSQL
-- Psycopg
-- SQLAlchemy
-- Streamlit
-- Git
-- GitHub
+The pipeline reads:
 
----
+* `customers.csv`
+* `products.csv`
+* `sales.csv`
 
-## Project Architecture
+from the MinIO `retail-data` bucket.
+
+### 2. Transform
+
+Python and Pandas are used to clean and prepare the data, including handling duplicates, missing values, data types, and other data-quality requirements.
+
+### 3. Validate
+
+The pipeline checks customer, product, and sales data before loading.
+
+If validation fails, the loading process is stopped.
+
+### 4. Load
+
+Validated data is loaded into PostgreSQL tables:
+
+* `customers`
+* `products`
+* `sales`
+
+The loading process uses conflict handling to avoid duplicate primary-key failures when the pipeline is executed repeatedly.
+
+### 5. Analytics
+
+SQL-based analytics are used to generate:
+
+* Total sales
+* Monthly sales
+* Top-selling products
+* Sales by city
+* Sales by category
+* Top customers
+* Dashboard summary metrics
+
+### 6. Dashboard
+
+Streamlit provides an interactive dashboard with date filtering and visualizations for sales and customer analysis.
+
+## 📁 Project Structure
 
 ```text
 Retail_Data_Engineering_Project/
 │
-├── config/
-│
 ├── data/
-│   ├── raw/
-│   └── processed/
+│   └── raw/
 │
-├── database/
+├── minio-data/
 │
 ├── logs/
 │
 ├── src/
-│   ├── extract.py
-│   ├── transform.py
-│   ├── validate.py
-│   ├── load.py
-│   ├── database.py
 │   ├── analytics.py
-│   ├── pipeline.py
+│   ├── dashboard.py
+│   ├── database.py
+│   ├── extract.py
+│   ├── load.py
 │   ├── logger.py
-│   └── dashboard.py
+│   ├── pipeline.py
+│   ├── transform.py
+│   └── validate.py
 │
 ├── tests/
+│   ├── test_pipeline.py
+│   ├── test_transform_run.py
+│   └── test_validate_run.py
 │
-├── ui/
-│
+├── .dockerignore
+├── .env
 ├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
 ├── requirements.txt
 └── README.md
+```
 
-Data Pipeline
-1. Extract
+## 🚀 How to Run
 
-Raw CSV files are read from the data/raw directory using Pandas.
+### 1. Clone the repository
 
-Input datasets include:
-
-customers.csv
-products.csv
-sales.csv
-2. Transform
-
-The raw data is cleaned and transformed before loading.
-
-Examples include:
-
-Handling missing values
-Cleaning data types
-Preparing data for database loading
-3. Validate
-
-The pipeline validates the datasets before loading them into PostgreSQL.
-
-If validation fails, the pipeline stops and displays the validation errors.
-
-4. Load
-
-Validated data is loaded into PostgreSQL.
-
-The project uses:
-
-Psycopg for PostgreSQL connectivity
-SQLAlchemy for database interaction
-5. Analyze
-
-SQL queries are used to generate business insights such as:
-
-Total sales
-Monthly sales
-Top-selling products
-Sales by city
-Sales by category
-Top customers
-6. Visualize
-
-The analytics results are displayed using an interactive Streamlit dashboard.
-
-The dashboard includes:
-
-KPI cards
-Sales charts
-Product analysis
-Customer analysis
-Category analysis
-City-wise sales
-Date range filtering
-Database
-
-The PostgreSQL database contains the following main tables:
-
-Customers
-
-Stores customer information.
-
-customer_id
-customer_name
-email
-city
-state
-Products
-
-Stores product information.
-
-product_id
-product_name
-category
-price
-stock_quantity
-Sales
-
-Stores sales transactions.
-
-order_id
-customer_id
-product_id
-quantity
-order_date
-store
-How to Run the Project
-1. Clone the repository
+```bash
 git clone https://github.com/deekshabhatt887-cmyk/Retail_Data_Engineering_Project.git
-2. Navigate to the project
 cd Retail_Data_Engineering_Project
-3. Create a virtual environment
+```
+
+### 2. Create and activate the virtual environment
+
+```bash
 python -m venv venv
-4. Activate the virtual environment
+```
 
 Windows PowerShell:
 
+```powershell
 .\venv\Scripts\Activate.ps1
-5. Install dependencies
+```
+
+### 3. Install dependencies
+
+```powershell
 pip install -r requirements.txt
-6. Configure environment variables
+```
 
-Create a .env file in the project root:
+### 4. Configure environment variables
 
-DB_HOST=localhost
-DB_NAME=retail_db
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_PORT=5432
+Create a `.env` file with your PostgreSQL connection details.
 
-Do not commit the .env file to GitHub.
+Do not commit `.env` to GitHub.
 
-7. Run the pipeline
+### 5. Start MinIO and the dashboard
+
+```powershell
+docker compose up -d --build
+```
+
+### 6. Run the ETL pipeline
+
+```powershell
 python src/pipeline.py
+```
 
-The pipeline will:
+### 7. Open the dashboard
 
-Extract
-   ↓
-Transform
-   ↓
-Validate
-   ↓
-Load
-8. Run the Streamlit dashboard
-streamlit run src/dashboard.py
+```text
+http://localhost:8501
+```
 
-The dashboard will open in your browser.
+### 8. Open MinIO Console
 
-Example Analytics
+```text
+http://localhost:9001
+```
 
-The project can answer questions such as:
+## 🧪 Testing
 
-What are the total sales?
-Which products sell the most?
-Which cities generate the highest sales?
-Which categories generate the most revenue?
-Who are the top customers?
-How do sales change over time?
-Data Engineering Concepts Demonstrated
+Run all tests with:
 
-This project demonstrates practical knowledge of:
+```powershell
+pytest
+```
 
-ETL pipelines
-Data extraction
-Data transformation
-Data validation
-PostgreSQL
-SQL queries
-Database connectivity
-SQLAlchemy
-Pandas
-Data quality checks
-Logging
-Environment variables
-Error handling
-Data analytics
-Streamlit dashboards
-Git and GitHub
-Future Improvements
+The project uses automated tests to verify data transformation, validation, and pipeline-related functionality.
 
-Possible future enhancements include:
+## 📊 Dashboard Features
 
-AWS cloud deployment
-Apache Airflow orchestration
-Docker containerization
-Automated testing with CI/CD
-Cloud data warehouse integration
-Incremental data loading
-Advanced data quality monitoring
-Data pipeline scheduling
-Author
+The dashboard provides:
+
+* Total Sales
+* Units Sold
+* Customer Count
+* Products Sold
+* Monthly Sales Trends
+* Top-Selling Products
+* Sales by City
+* Sales by Category
+* Top Customers
+* Date-range filtering
+
+## 🔐 Security
+
+Database credentials are stored in environment variables using `.env`.
+
+The `.env` file is excluded from Git using `.gitignore`.
+
+## 🎯 Key Data Engineering Concepts Demonstrated
+
+This project demonstrates practical understanding of:
+
+* ETL pipelines
+* Object storage
+* S3-compatible storage
+* Data cleaning
+* Data validation
+* PostgreSQL
+* SQL analytics
+* Database connectivity
+* Logging
+* Automated testing
+* Docker
+* Docker Compose
+* Environment variables
+* Dashboard development
+* Git and GitHub
+
+## Author
 
 Deeksha Bhatt
-
-This project was created as part of a practical Data Engineering learning journey.
