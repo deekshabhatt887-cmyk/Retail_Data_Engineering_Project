@@ -1,24 +1,40 @@
 import pandas as pd
-from pathlib import Path
+from io import BytesIO
+from minio import Minio
 
-BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATA_PATH = BASE_DIR/"data"/"raw"
+# Connect to MinIO
+client = Minio(
+    "localhost:9000",
+    access_key="minioadmin",
+    secret_key="minioadmin123",
+    secure=False
+)
+
+BUCKET_NAME = "retail-data"
+
+
+def read_csv_from_minio(file_name):
+    response = client.get_object(
+        BUCKET_NAME,
+        f"raw/{file_name}"
+    )
+
+    data = response.read()
+
+    response.close()
+    response.release_conn()
+
+    return pd.read_csv(BytesIO(data))
+
 
 def read_data():
-    customers = pd.read_csv(
-        DATA_PATH / "customers.csv"
-    )
-
-    products = pd.read_csv(
-        DATA_PATH / "products.csv"
-    )
-
-    sales = pd.read_csv(
-        DATA_PATH / "sales.csv"
-    )
+    customers = read_csv_from_minio("customers.csv")
+    products = read_csv_from_minio("products.csv")
+    sales = read_csv_from_minio("sales.csv")
 
     return customers, products, sales
+
 
 if __name__ == "__main__":
 
